@@ -1,0 +1,38 @@
+{
+  "TX": {
+    "state_code": "TX",
+    "state_name": "Texas",
+    "primary_color": "#BF5700",
+    "accent_color": "#333F48",
+    "logo_path": "assets/themes/TX/logo.png",
+    "support_email": "support-tx@hestia.app",
+    "resource_categories": [
+      "shelter", "food", "healthcare", "mental_health",
+      "substance_use", "employment", "legal", "transportation", "church_meal"
+    ]
+  },
+  "CA": {
+    "state_code": "CA",
+    "state_name": "California",
+    "primary_color": "#003DA5",
+    "accent_color": "#FDB913",
+    "logo_path": "assets/themes/CA/logo.png",
+    "support_email": "support-ca@hestia.app",
+    "resource_categories": [
+      "shelter", "food", "healthcare", "mental_health",
+      "substance_use", "employment", "legal", "transportation", "clothing"
+    ]
+  },
+  "NY": {
+    "state_code": "NY",
+    "state_name": "New York",
+    "primary_color": "#003087",
+    "accent_color": "#E31837",
+    "logo_path": "assets/themes/NY/logo.png",
+    "support_email": "support-ny@hestia.app",
+    "resource_categories": [
+      "shelter", "food", "healthcare", "mental_health",
+      "substance_use", "employment", "legal", "transportation", "drop_in_center"
+    ]
+  }
+}

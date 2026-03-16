@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "copilot/**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Flutter — lint, test, and build
+  # -----------------------------------------------------------------------
+  flutter:
+    name: Flutter (lint + test)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: mobile_app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.19.x"
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run unit tests
+        run: flutter test test/unit_test.dart --coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: mobile_app/coverage/lcov.info
+          flags: flutter
+        continue-on-error: true
+
+  # -----------------------------------------------------------------------
+  # Database — validate SQL migrations
+  # -----------------------------------------------------------------------
+  database:
+    name: Database (SQL lint)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sqlfluff
+        run: pip install sqlfluff
+
+      - name: Lint SQL migrations
+        run: |
+          sqlfluff lint database/migrations/ \
+            --dialect postgres \
+            --exclude-rules ambiguous.column_count \
+            --warn-unused-templating
+
+  # -----------------------------------------------------------------------
+  # Backend edge functions — Deno type-check
+  # -----------------------------------------------------------------------
+  backend:
+    name: Backend (Deno type-check)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Type-check edge functions
+        run: |
+          deno check \
+            backend/functions/get-resources/index.ts \
+            backend/functions/get-tenant-config/index.ts
