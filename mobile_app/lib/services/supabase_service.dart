@@ -19,19 +19,33 @@ final connectivityProvider = StreamProvider<bool>((ref) {
 });
 
 // ---------------------------------------------------------------------------
-// Supabase client shortcut
-// ---------------------------------------------------------------------------
-
-SupabaseClient get _supabase => Supabase.instance.client;
-
-// ---------------------------------------------------------------------------
 // ResourceService — loads resources from Supabase with offline fallback
 // ---------------------------------------------------------------------------
 
 class ResourceService {
-  // Fetch resources filtered by state, optionally county and category.
-  // Falls back to local Hive cache when the device is offline.
-  static Future<List<Resource>> getResources({
+  final _supabase = Supabase.instance.client;
+
+  /// Fetches all active resources for a specific county, with offline fallback.
+  Future<List<Resource>> getResourcesByCounty(String countyId) async {
+    try {
+      final response = await _supabase
+          .from('resources')
+          .select()
+          .eq('county_id', countyId)
+          .eq('status', 'active')
+          .order('name');
+      final resources =
+          (response as List).map((r) => Resource.fromJson(r)).toList();
+      await OfflineCacheService.cacheResources(resources);
+      return resources;
+    } catch (_) {
+      return OfflineCacheService.getCachedResources(countyId: countyId);
+    }
+  }
+
+  /// Fetches resources filtered by state, optionally county and category.
+  /// Falls back to local Hive cache when the device is offline.
+  Future<List<Resource>> getResources({
     required String stateCode,
     String? countyId,
     String? category,
@@ -85,8 +99,8 @@ class ResourceService {
     }
   }
 
-  // Fetch a single resource by id (with offline fallback).
-  static Future<Resource?> getResource(String id) async {
+  /// Fetches a single resource by id (with offline fallback).
+  Future<Resource?> getResource(String id) async {
     try {
       final response =
           await _supabase.from('resources').select().eq('id', id).single();
@@ -104,6 +118,8 @@ class ResourceService {
 // ---------------------------------------------------------------------------
 
 class LocationService {
+  static final _supabase = Supabase.instance.client;
+
   static Future<List<StateInfo>> getStates() async {
     try {
       final response =
@@ -139,6 +155,8 @@ class LocationService {
 // ---------------------------------------------------------------------------
 
 class TenantService {
+  static final _supabase = Supabase.instance.client;
+
   static Future<TenantConfig> getTenantConfig(String stateCode) async {
     try {
       final response = await _supabase
@@ -170,6 +188,11 @@ final selectedCountyIdProvider = StateProvider<String?>((ref) => null);
 // Selected resource category filter
 final selectedCategoryProvider = StateProvider<String?>((ref) => null);
 
+// Singleton ResourceService instance
+final resourceServiceProvider = Provider<ResourceService>((ref) {
+  return ResourceService();
+});
+
 // Tenant config for the selected state
 final tenantConfigProvider =
     FutureProvider.family<TenantConfig, String>((ref, stateCode) async {
@@ -190,9 +213,16 @@ final countiesProvider =
 // Resources filtered by state / county / category
 final resourcesProvider = FutureProvider.family<List<Resource>,
     ({String stateCode, String? countyId, String? category})>((ref, params) async {
-  return ResourceService.getResources(
+  return ref.read(resourceServiceProvider).getResources(
     stateCode: params.stateCode,
     countyId: params.countyId,
     category: params.category,
   );
 });
+
+// Resources for a specific county (uses the dedicated getResourcesByCounty method)
+final resourcesByCountyProvider =
+    FutureProvider.family<List<Resource>, String>((ref, countyId) async {
+  return ref.read(resourceServiceProvider).getResourcesByCounty(countyId);
+});
+

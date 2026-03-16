@@ -53,15 +53,16 @@ class OfflineCacheService {
     await box.putAll(map);
   }
 
-  /// Return all cached resources for a given [stateId], optionally filtered
-  /// by [countyId] and/or [category].
+  /// Return all cached resources, optionally filtered by [stateId],
+  /// [countyId] and/or [category].  Pass only [countyId] to perform a
+  /// county-scoped query without knowing the parent state.
   static List<Resource> getCachedResources({
-    required String stateId,
+    String? stateId,
     String? countyId,
     String? category,
   }) {
     return _resourcesBox.values.where((r) {
-      if (r.stateId != stateId) return false;
+      if (stateId != null && r.stateId != stateId) return false;
       if (countyId != null && r.countyId != countyId) return false;
       if (category != null && r.category != category) return false;
       return true;

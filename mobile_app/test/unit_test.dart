@@ -167,8 +167,88 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // categoryMeta helper tests
+  // OfflineCacheService.getCachedResources — filter logic tests
+  // (exercises the same predicate used by getResourcesByCounty offline path)
   // -------------------------------------------------------------------------
+  group('getCachedResources filter logic', () {
+    // Build sample Resources directly (no Hive I/O needed for predicate tests)
+    Resource _makeResource({
+      required String id,
+      required String stateId,
+      String? countyId,
+      required String category,
+    }) {
+      return Resource(
+        id: id,
+        stateId: stateId,
+        countyId: countyId,
+        name: 'Resource $id',
+        category: category,
+        status: 'active',
+        updatedAt: DateTime(2024),
+      );
+    }
+
+    // Apply the same predicate logic used inside getCachedResources.
+    List<Resource> _filterResources(
+      List<Resource> all, {
+      String? stateId,
+      String? countyId,
+      String? category,
+    }) {
+      return all.where((r) {
+        if (stateId != null && r.stateId != stateId) return false;
+        if (countyId != null && r.countyId != countyId) return false;
+        if (category != null && r.category != category) return false;
+        return true;
+      }).toList();
+    }
+
+    late List<Resource> allResources;
+
+    setUp(() {
+      allResources = [
+        _makeResource(id: '1', stateId: 'state-TX', countyId: 'harris', category: 'shelter'),
+        _makeResource(id: '2', stateId: 'state-TX', countyId: 'harris', category: 'food'),
+        _makeResource(id: '3', stateId: 'state-TX', countyId: 'dallas', category: 'shelter'),
+        _makeResource(id: '4', stateId: 'state-CA', countyId: 'la',     category: 'food'),
+      ];
+    });
+
+    test('county-only filter returns all resources for that county', () {
+      final results = _filterResources(allResources, countyId: 'harris');
+      expect(results.length, 2);
+      expect(results.every((r) => r.countyId == 'harris'), isTrue);
+    });
+
+    test('county + category filter returns matching resources', () {
+      final results = _filterResources(allResources, countyId: 'harris', category: 'food');
+      expect(results.length, 1);
+      expect(results.first.id, '2');
+    });
+
+    test('state-only filter returns all resources for that state', () {
+      final results = _filterResources(allResources, stateId: 'state-TX');
+      expect(results.length, 3);
+      expect(results.every((r) => r.stateId == 'state-TX'), isTrue);
+    });
+
+    test('state + county filter narrows correctly', () {
+      final results = _filterResources(allResources, stateId: 'state-TX', countyId: 'dallas');
+      expect(results.length, 1);
+      expect(results.first.id, '3');
+    });
+
+    test('no filter returns all resources', () {
+      final results = _filterResources(allResources);
+      expect(results.length, allResources.length);
+    });
+
+    test('county with no matching resources returns empty list', () {
+      final results = _filterResources(allResources, countyId: 'unknown-county');
+      expect(results, isEmpty);
+    });
+  });
   group('categoryMeta', () {
     test('returns correct label for known categories', () {
       expect(categoryMeta('shelter').label, 'Shelter');

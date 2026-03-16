@@ -31,7 +31,7 @@ class ResourceDetailScreen extends StatelessWidget {
 
     // If no resource was passed, load it from cache or network
     return FutureBuilder<Resource?>(
-      future: ResourceService.getResource(resourceId),
+      future: ResourceService().getResource(resourceId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
