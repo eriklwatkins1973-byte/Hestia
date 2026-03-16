@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'router.dart';
+
 void main() {
   runApp(const HestiaApp());
 }
@@ -9,17 +11,13 @@ class HestiaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Hestia',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Hestia - Homelessness Resource Directory'),
-        ),
-      ),
+      routerConfig: appRouter,
     );
   }
 }

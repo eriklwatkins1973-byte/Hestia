@@ -26,7 +26,7 @@ Resource _resource({
 
 void main() {
   group('ResourceCard', () {
-    testWidgets('renders organisation name in bold', (tester) async {
+    testWidgets('renders organization name in bold', (tester) async {
       await tester.pumpWidget(_wrap(
         ResourceCard(resource: _resource(organizationName: 'Hope Shelter')),
       ));
