@@ -11,9 +11,9 @@ import '../widgets/resource_card.dart';
 class ResourceListScreen extends StatefulWidget {
   final String countyId;
 
-  /// Service used to fetch resources. Defaults to a [ResourceService] with
-  /// its standard configuration; callers may supply an alternative instance
-  /// (e.g. with a mock HTTP client) for testing.
+  /// Service used to fetch resources. Defaults to a [ResourceService] that
+  /// uses [Supabase.instance.client]; callers may supply an alternative
+  /// instance (e.g. backed by a mock [SupabaseClient]) for testing.
   final ResourceService resourceService;
 
   ResourceListScreen({

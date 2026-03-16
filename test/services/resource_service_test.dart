@@ -3,10 +3,59 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hestia/models/resource_category.dart';
 import 'package:hestia/services/resource_service.dart';
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/// Supabase project URL used for all test clients.
+const _testUrl = 'https://test.supabase.co';
+
+/// Fake anon key — value does not matter for unit tests.
+const _testKey = 'fake-anon-key';
+
+/// Tracks the most recently created [SupabaseClient] so it can be disposed
+/// in [tearDown].
+SupabaseClient? _activeClient;
+
+/// Creates a [SupabaseClient] backed by [httpClient] and records it for
+/// cleanup.
+SupabaseClient _supabaseWith(http.Client httpClient) {
+  _activeClient = SupabaseClient(_testUrl, _testKey, httpClient: httpClient);
+  return _activeClient!;
+}
+
+/// Creates a [ResourceService] whose HTTP layer is a [MockClient] that always
+/// returns [body] with [statusCode].
+ResourceService _serviceReturning(
+  String body, {
+  int statusCode = 200,
+}) {
+  final mockHttp = MockClient(
+    (_) async => http.Response(
+      body,
+      statusCode,
+      headers: {'content-type': 'application/json; charset=utf-8'},
+    ),
+  );
+  return ResourceService(client: _supabaseWith(mockHttp));
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  tearDown(() async {
+    await _activeClient?.dispose();
+    _activeClient = null;
+  });
+
   group('ResourceService', () {
     const countyId = 'some-county-uuid';
 
@@ -22,15 +71,20 @@ void main() {
     };
 
     test('getResourcesByCounty returns a list of Resources on 200', () async {
-      final mockClient = MockClient((request) async {
+      final mockHttp = MockClient((request) async {
+        // Verify the PostgREST filter is present in the URL.
         expect(
-          request.url.toString(),
-          contains('county_id=some-county-uuid'),
+          request.url.queryParameters['county_id'],
+          'eq.$countyId',
         );
-        return http.Response(jsonEncode([sampleResourceJson]), 200);
+        return http.Response(
+          jsonEncode([sampleResourceJson]),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
       });
 
-      final service = ResourceService(client: mockClient);
+      final service = ResourceService(client: _supabaseWith(mockHttp));
       final resources = await service.getResourcesByCounty(countyId);
 
       expect(resources.length, 1);
@@ -41,10 +95,9 @@ void main() {
       expect(resources.first.isActive, true);
     });
 
-    test('getResourcesByCounty returns an empty list when no resources', () async {
-      final mockClient = MockClient((_) async => http.Response('[]', 200));
-
-      final service = ResourceService(client: mockClient);
+    test('getResourcesByCounty returns an empty list when no resources',
+        () async {
+      final service = _serviceReturning('[]');
       final resources = await service.getResourcesByCounty(countyId);
 
       expect(resources, isEmpty);
@@ -59,10 +112,9 @@ void main() {
         'is_active': true,
       };
 
-      final mockClient = MockClient((_) async =>
-          http.Response(jsonEncode([sampleResourceJson, secondResource]), 200));
-
-      final service = ResourceService(client: mockClient);
+      final service = _serviceReturning(
+        jsonEncode([sampleResourceJson, secondResource]),
+      );
       final resources = await service.getResourcesByCounty(countyId);
 
       expect(resources.length, 2);
@@ -72,47 +124,58 @@ void main() {
     });
 
     test('getResourcesByCounty throws on non-200 response', () async {
-      final mockClient = MockClient(
-        (_) async => http.Response('Not Found', 404),
+      final service = _serviceReturning(
+        '{"message":"Not Found","code":"PGRST301"}',
+        statusCode: 404,
       );
 
-      final service = ResourceService(client: mockClient);
-
-      expect(
-        () => service.getResourcesByCounty(countyId),
-        throwsException,
+      await expectLater(
+        service.getResourcesByCounty(countyId),
+        throwsA(isA<Exception>()),
       );
     });
 
     test('getResourcesByCounty throws on server error', () async {
-      final mockClient = MockClient(
-        (_) async => http.Response('Internal Server Error', 500),
+      final service = _serviceReturning(
+        '{"message":"Internal Server Error"}',
+        statusCode: 500,
       );
 
-      final service = ResourceService(client: mockClient);
-
-      expect(
-        () => service.getResourcesByCounty(countyId),
-        throwsException,
+      await expectLater(
+        service.getResourcesByCounty(countyId),
+        throwsA(isA<Exception>()),
       );
     });
 
-    test('getResourcesByCounty URL-encodes countyId', () async {
+    test('getResourcesByCounty URL-encodes countyId in PostgREST eq filter',
+        () async {
       const specialCountyId = 'county with spaces/and-slashes';
 
-      final mockClient = MockClient((request) async {
-        expect(request.url.queryParameters['county_id'], specialCountyId);
-        return http.Response('[]', 200);
+      final mockHttp = MockClient((request) async {
+        // PostgREST encodes `.eq('county_id', value)` as
+        // county_id=eq.{value} in the query string.
+        expect(
+          request.url.queryParameters['county_id'],
+          'eq.$specialCountyId',
+        );
+        return http.Response(
+          '[]',
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
       });
 
-      final service = ResourceService(client: mockClient);
+      final service = ResourceService(client: _supabaseWith(mockHttp));
       final resources = await service.getResourcesByCounty(specialCountyId);
 
       expect(resources, isEmpty);
     });
 
     test('ResourceService can be instantiated without parameters', () {
+      // Supabase.instance.client is accessed lazily — instantiation alone
+      // must not throw even before Supabase.initialize() has been called.
       expect(() => ResourceService(), returnsNormally);
     });
   });
 }
+

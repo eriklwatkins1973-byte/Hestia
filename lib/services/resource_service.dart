@@ -1,41 +1,30 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/resource.dart';
 
-/// Service for fetching [Resource] data from the backend API.
+/// Service for fetching [Resource] data from Supabase.
 class ResourceService {
-  final http.Client _client;
-  final String _baseUrl;
+  /// Optional [SupabaseClient] injected at construction time.
+  ///
+  /// When `null`, [Supabase.instance.client] is used at call-time so that the
+  /// class can be instantiated before [Supabase.initialize] is called (e.g.
+  /// in tests that only instantiate but never invoke the service).
+  final SupabaseClient? _client;
 
-  ResourceService({
-    http.Client? client,
-    String baseUrl = 'https://api.hestia.example.com',
-  })  : _client = client ?? http.Client(),
-        _baseUrl = baseUrl;
+  ResourceService({SupabaseClient? client}) : _client = client;
+
+  SupabaseClient get _supabase => _client ?? Supabase.instance.client;
 
   /// Returns all active resources belonging to [countyId].
   ///
-  /// Throws an [Exception] if the server responds with a non-200 status code.
+  /// Throws a [PostgrestException] if the Supabase query fails.
   Future<List<Resource>> getResourcesByCounty(String countyId) async {
-    final uri = Uri.parse('$_baseUrl/resources').replace(
-      queryParameters: {'county_id': countyId},
-    );
+    final data = await _supabase
+        .from('resources')
+        .select()
+        .eq('county_id', countyId)
+        .eq('is_active', true);
 
-    final response = await _client.get(uri);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data =
-          jsonDecode(response.body) as List<dynamic>;
-      return data
-          .map((json) => Resource.fromJson(json as Map<String, dynamic>))
-          .toList();
-    }
-
-    throw Exception(
-      'Failed to load resources for county $countyId: '
-      'HTTP ${response.statusCode}',
-    );
+    return data.map((json) => Resource.fromJson(json)).toList();
   }
 }

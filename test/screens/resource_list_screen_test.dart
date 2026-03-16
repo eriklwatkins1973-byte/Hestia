@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hestia/screens/resource_list_screen.dart';
 import 'package:hestia/services/resource_service.dart';
 import 'package:hestia/widgets/resource_card.dart';
@@ -15,6 +16,8 @@ import 'package:hestia/widgets/resource_card.dart';
 Widget _wrap(Widget widget) => MaterialApp(home: widget);
 
 const _countyId = 'county-001';
+const _testUrl = 'https://test.supabase.co';
+const _testKey = 'fake-anon-key';
 
 final _sampleResourceJson = {
   'id': 'res-1',
@@ -33,16 +36,36 @@ final _secondResourceJson = {
   'is_active': true,
 };
 
+/// Tracks every [SupabaseClient] created during the current test so they can
+/// be disposed in [tearDown].
+final _activeClients = <SupabaseClient>[];
+
+/// Creates a [SupabaseClient] backed by [mockHttp], records it for cleanup,
+/// and wraps it in a [ResourceService].
+ResourceService _serviceWith(http.Client mockHttp) {
+  final supabase = SupabaseClient(_testUrl, _testKey, httpClient: mockHttp);
+  _activeClients.add(supabase);
+  return ResourceService(client: supabase);
+}
+
 ResourceService _serviceReturning(List<Map<String, dynamic>> resources) =>
-    ResourceService(
-      client: MockClient(
-        (_) async => http.Response(jsonEncode(resources), 200),
+    _serviceWith(
+      MockClient(
+        (_) async => http.Response(
+          jsonEncode(resources),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        ),
       ),
     );
 
-ResourceService _serviceReturningError() => ResourceService(
-      client: MockClient(
-        (_) async => http.Response('Internal Server Error', 500),
+ResourceService _serviceReturningError() => _serviceWith(
+      MockClient(
+        (_) async => http.Response(
+          '{"message":"Internal Server Error"}',
+          500,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        ),
       ),
     );
 
@@ -51,13 +74,24 @@ ResourceService _serviceReturningError() => ResourceService(
 // ---------------------------------------------------------------------------
 
 void main() {
+  tearDown(() async {
+    for (final client in _activeClients) {
+      await client.dispose();
+    }
+    _activeClients.clear();
+  });
+
   group('ResourceListScreen', () {
     testWidgets('shows a loading indicator while fetching', (tester) async {
-      // Use a completer so the future never settles during this test.
-      final service = ResourceService(
-        client: MockClient((_) async {
+      // Use a delayed response so the future never settles during this test.
+      final service = _serviceWith(
+        MockClient((_) async {
           await Future<void>.delayed(const Duration(seconds: 10));
-          return http.Response('[]', 200);
+          return http.Response(
+            '[]',
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
         }),
       );
 
@@ -140,3 +174,4 @@ void main() {
     });
   });
 }
+
