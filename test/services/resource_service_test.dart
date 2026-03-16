@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:hestia/models/resource_category.dart';
 import 'package:hestia/services/resource_service.dart';
 
 void main() {
@@ -14,10 +15,7 @@ void main() {
       'county_id': countyId,
       'category': 'shelter',
       'organization_name': 'Hope Shelter',
-      'description': 'Safe overnight stay',
       'address': '123 Main St',
-      'latitude': 37.7749,
-      'longitude': -122.4194,
       'phone_number': '555-0100',
       'website_url': 'https://hope.example.com',
       'is_active': true,
@@ -38,7 +36,7 @@ void main() {
       expect(resources.length, 1);
       expect(resources.first.id, 'res-1');
       expect(resources.first.countyId, countyId);
-      expect(resources.first.category, 'shelter');
+      expect(resources.first.category, ResourceCategory.shelter);
       expect(resources.first.organizationName, 'Hope Shelter');
       expect(resources.first.isActive, true);
     });
@@ -70,7 +68,7 @@ void main() {
       expect(resources.length, 2);
       expect(resources[0].id, 'res-1');
       expect(resources[1].id, 'res-2');
-      expect(resources[1].category, 'meal');
+      expect(resources[1].category, ResourceCategory.meal);
     });
 
     test('getResourcesByCounty throws on non-200 response', () async {

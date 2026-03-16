@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hestia/models/resource.dart';
+import 'package:hestia/models/resource_category.dart';
 
 void main() {
   group('Resource', () {
@@ -7,13 +8,13 @@ void main() {
       const resource = Resource(
         id: '1',
         countyId: 'county-123',
-        category: 'shelter',
+        category: ResourceCategory.shelter,
         organizationName: 'Hope Shelter',
       );
 
       expect(resource.id, '1');
       expect(resource.countyId, 'county-123');
-      expect(resource.category, 'shelter');
+      expect(resource.category, ResourceCategory.shelter);
       expect(resource.organizationName, 'Hope Shelter');
       expect(resource.isActive, true);
     });
@@ -22,12 +23,9 @@ void main() {
       const resource = Resource(
         id: '2',
         countyId: 'county-456',
-        category: 'meal',
+        category: ResourceCategory.meal,
         organizationName: 'Community Kitchen',
-        description: 'Hot meals served daily',
         address: '123 Main St',
-        latitude: 37.7749,
-        longitude: -122.4194,
         phoneNumber: '555-0100',
         websiteUrl: 'https://example.com',
         isActive: false,
@@ -35,12 +33,9 @@ void main() {
 
       expect(resource.id, '2');
       expect(resource.countyId, 'county-456');
-      expect(resource.category, 'meal');
+      expect(resource.category, ResourceCategory.meal);
       expect(resource.organizationName, 'Community Kitchen');
-      expect(resource.description, 'Hot meals served daily');
       expect(resource.address, '123 Main St');
-      expect(resource.latitude, 37.7749);
-      expect(resource.longitude, -122.4194);
       expect(resource.phoneNumber, '555-0100');
       expect(resource.websiteUrl, 'https://example.com');
       expect(resource.isActive, false);
@@ -50,7 +45,7 @@ void main() {
       const resource = Resource(
         id: '3',
         countyId: 'county-789',
-        category: 'shelter',
+        category: ResourceCategory.shelter,
         organizationName: 'Safe Haven',
       );
 
@@ -63,10 +58,7 @@ void main() {
         'county_id': 'county-101',
         'category': 'shelter',
         'organization_name': 'Sunrise Shelter',
-        'description': 'Safe overnight stay',
         'address': '456 Oak Ave',
-        'latitude': 34.0522,
-        'longitude': -118.2437,
         'phone_number': '555-0200',
         'website_url': 'https://sunrise.example.com',
         'is_active': true,
@@ -76,12 +68,9 @@ void main() {
 
       expect(resource.id, '4');
       expect(resource.countyId, 'county-101');
-      expect(resource.category, 'shelter');
+      expect(resource.category, ResourceCategory.shelter);
       expect(resource.organizationName, 'Sunrise Shelter');
-      expect(resource.description, 'Safe overnight stay');
       expect(resource.address, '456 Oak Ave');
-      expect(resource.latitude, 34.0522);
-      expect(resource.longitude, -118.2437);
       expect(resource.phoneNumber, '555-0200');
       expect(resource.websiteUrl, 'https://sunrise.example.com');
       expect(resource.isActive, true);
@@ -104,7 +93,7 @@ void main() {
       const resource = Resource(
         id: '6',
         countyId: 'county-303',
-        category: 'shelter',
+        category: ResourceCategory.shelter,
         organizationName: 'Harbor House',
         phoneNumber: '555-0300',
         websiteUrl: 'https://harbor.example.com',
@@ -125,7 +114,7 @@ void main() {
       const resource = Resource(
         id: '7',
         countyId: 'county-404',
-        category: 'shelter',
+        category: ResourceCategory.shelter,
         organizationName: 'City Shelter',
       );
 
@@ -144,18 +133,31 @@ void main() {
       const resource1 = Resource(
         id: '8',
         countyId: 'county-505',
-        category: 'shelter',
+        category: ResourceCategory.shelter,
         organizationName: 'Equal Shelter',
       );
 
       const resource2 = Resource(
         id: '8',
         countyId: 'county-505',
-        category: 'shelter',
+        category: ResourceCategory.shelter,
         organizationName: 'Equal Shelter',
       );
 
       expect(resource1, equals(resource2));
+    });
+
+    test('all ResourceCategory values round-trip through JSON', () {
+      for (final cat in ResourceCategory.values) {
+        final json = Resource(
+          id: 'x',
+          countyId: 'c',
+          category: cat,
+          organizationName: 'Org',
+        ).toJson();
+        final restored = Resource.fromJson(json);
+        expect(restored.category, cat);
+      }
     });
   });
 }

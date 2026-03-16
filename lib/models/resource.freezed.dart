@@ -20,13 +20,10 @@ mixin _$Resource {
   String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'county_id')
   String get countyId => throw _privateConstructorUsedError;
-  String get category => throw _privateConstructorUsedError;
+  ResourceCategory get category => throw _privateConstructorUsedError;
   @JsonKey(name: 'organization_name')
   String get organizationName => throw _privateConstructorUsedError;
-  String? get description => throw _privateConstructorUsedError;
   String? get address => throw _privateConstructorUsedError;
-  double? get latitude => throw _privateConstructorUsedError;
-  double? get longitude => throw _privateConstructorUsedError;
   @JsonKey(name: 'phone_number')
   String? get phoneNumber => throw _privateConstructorUsedError;
   @JsonKey(name: 'website_url')
@@ -52,12 +49,9 @@ abstract class $ResourceCopyWith<$Res> {
   $Res call({
     String id,
     @JsonKey(name: 'county_id') String countyId,
-    String category,
+    ResourceCategory category,
     @JsonKey(name: 'organization_name') String organizationName,
-    String? description,
     String? address,
-    double? latitude,
-    double? longitude,
     @JsonKey(name: 'phone_number') String? phoneNumber,
     @JsonKey(name: 'website_url') String? websiteUrl,
     @JsonKey(name: 'is_active') bool isActive,
@@ -83,10 +77,7 @@ class _$ResourceCopyWithImpl<$Res, $Val extends Resource>
     Object? countyId = null,
     Object? category = null,
     Object? organizationName = null,
-    Object? description = freezed,
     Object? address = freezed,
-    Object? latitude = freezed,
-    Object? longitude = freezed,
     Object? phoneNumber = freezed,
     Object? websiteUrl = freezed,
     Object? isActive = null,
@@ -103,27 +94,15 @@ class _$ResourceCopyWithImpl<$Res, $Val extends Resource>
       category: null == category
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ResourceCategory,
       organizationName: null == organizationName
           ? _value.organizationName
           : organizationName // ignore: cast_nullable_to_non_nullable
               as String,
-      description: freezed == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String?,
       address: freezed == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
               as String?,
-      latitude: freezed == latitude
-          ? _value.latitude
-          : latitude // ignore: cast_nullable_to_non_nullable
-              as double?,
-      longitude: freezed == longitude
-          ? _value.longitude
-          : longitude // ignore: cast_nullable_to_non_nullable
-              as double?,
       phoneNumber: freezed == phoneNumber
           ? _value.phoneNumber
           : phoneNumber // ignore: cast_nullable_to_non_nullable
@@ -151,12 +130,9 @@ abstract class _$$ResourceImplCopyWith<$Res>
   $Res call({
     String id,
     @JsonKey(name: 'county_id') String countyId,
-    String category,
+    ResourceCategory category,
     @JsonKey(name: 'organization_name') String organizationName,
-    String? description,
     String? address,
-    double? latitude,
-    double? longitude,
     @JsonKey(name: 'phone_number') String? phoneNumber,
     @JsonKey(name: 'website_url') String? websiteUrl,
     @JsonKey(name: 'is_active') bool isActive,
@@ -180,10 +156,7 @@ class __$$ResourceImplCopyWithImpl<$Res>
     Object? countyId = null,
     Object? category = null,
     Object? organizationName = null,
-    Object? description = freezed,
     Object? address = freezed,
-    Object? latitude = freezed,
-    Object? longitude = freezed,
     Object? phoneNumber = freezed,
     Object? websiteUrl = freezed,
     Object? isActive = null,
@@ -200,27 +173,15 @@ class __$$ResourceImplCopyWithImpl<$Res>
       category: null == category
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ResourceCategory,
       organizationName: null == organizationName
           ? _value.organizationName
           : organizationName // ignore: cast_nullable_to_non_nullable
               as String,
-      description: freezed == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String?,
       address: freezed == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
               as String?,
-      latitude: freezed == latitude
-          ? _value.latitude
-          : latitude // ignore: cast_nullable_to_non_nullable
-              as double?,
-      longitude: freezed == longitude
-          ? _value.longitude
-          : longitude // ignore: cast_nullable_to_non_nullable
-              as double?,
       phoneNumber: freezed == phoneNumber
           ? _value.phoneNumber
           : phoneNumber // ignore: cast_nullable_to_non_nullable
@@ -245,10 +206,7 @@ class _$ResourceImpl implements _Resource {
     @JsonKey(name: 'county_id') required this.countyId,
     required this.category,
     @JsonKey(name: 'organization_name') required this.organizationName,
-    this.description,
     this.address,
-    this.latitude,
-    this.longitude,
     @JsonKey(name: 'phone_number') this.phoneNumber,
     @JsonKey(name: 'website_url') this.websiteUrl,
     @JsonKey(name: 'is_active') @Default(true) this.isActive = true,
@@ -263,18 +221,12 @@ class _$ResourceImpl implements _Resource {
   @JsonKey(name: 'county_id')
   final String countyId;
   @override
-  final String category;
+  final ResourceCategory category;
   @override
   @JsonKey(name: 'organization_name')
   final String organizationName;
   @override
-  final String? description;
-  @override
   final String? address;
-  @override
-  final double? latitude;
-  @override
-  final double? longitude;
   @override
   @JsonKey(name: 'phone_number')
   final String? phoneNumber;
@@ -288,7 +240,7 @@ class _$ResourceImpl implements _Resource {
 
   @override
   String toString() {
-    return 'Resource(id: $id, countyId: $countyId, category: $category, organizationName: $organizationName, description: $description, address: $address, latitude: $latitude, longitude: $longitude, phoneNumber: $phoneNumber, websiteUrl: $websiteUrl, isActive: $isActive)';
+    return 'Resource(id: $id, countyId: $countyId, category: $category, organizationName: $organizationName, address: $address, phoneNumber: $phoneNumber, websiteUrl: $websiteUrl, isActive: $isActive)';
   }
 
   @override
@@ -303,13 +255,7 @@ class _$ResourceImpl implements _Resource {
                 other.category == category) &&
             (identical(other.organizationName, organizationName) ||
                 other.organizationName == organizationName) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
             (identical(other.address, address) || other.address == address) &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude) &&
             (identical(other.phoneNumber, phoneNumber) ||
                 other.phoneNumber == phoneNumber) &&
             (identical(other.websiteUrl, websiteUrl) ||
@@ -326,10 +272,7 @@ class _$ResourceImpl implements _Resource {
       countyId,
       category,
       organizationName,
-      description,
       address,
-      latitude,
-      longitude,
       phoneNumber,
       websiteUrl,
       isActive);
@@ -354,12 +297,9 @@ abstract class _Resource implements Resource {
   const factory _Resource({
     required final String id,
     @JsonKey(name: 'county_id') required final String countyId,
-    required final String category,
+    required final ResourceCategory category,
     @JsonKey(name: 'organization_name') required final String organizationName,
-    final String? description,
     final String? address,
-    final double? latitude,
-    final double? longitude,
     @JsonKey(name: 'phone_number') final String? phoneNumber,
     @JsonKey(name: 'website_url') final String? websiteUrl,
     @JsonKey(name: 'is_active') @Default(true) final bool isActive,
@@ -374,18 +314,12 @@ abstract class _Resource implements Resource {
   @JsonKey(name: 'county_id')
   String get countyId;
   @override
-  String get category;
+  ResourceCategory get category;
   @override
   @JsonKey(name: 'organization_name')
   String get organizationName;
   @override
-  String? get description;
-  @override
   String? get address;
-  @override
-  double? get latitude;
-  @override
-  double? get longitude;
   @override
   @JsonKey(name: 'phone_number')
   String? get phoneNumber;
