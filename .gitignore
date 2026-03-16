@@ -1,0 +1,28 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
+# Build outputs
+build/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Platform directories (generated)
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+
+# Environment/secrets
+.env
+.env.local
