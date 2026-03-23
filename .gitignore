@@ -1,3 +1,6 @@
+
+# Flutter/Dart
+
 # Miscellaneous
 *.class
 *.log
@@ -24,10 +27,36 @@ migrate_working_dir/
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
+
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
+copilot/fetch-resources-by-county-id
+pubspec.lock
+
+# Build outputs
+build/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Platform directories (generated)
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+
+# Environment/secrets
+.env
+.env.local
+
 .pub-cache/
 .pub/
 /build/
@@ -47,3 +76,4 @@ app.*.map.json
 # Uncomment the lines below if you prefer not to commit generated code:
 # **/*.freezed.dart
 # **/*.g.dart
+

@@ -1,5 +1,9 @@
 name: hestia
+copilot/fetch-resources-by-county-id
+description: A multi-tenant mobile application for homelessness resources.
+
 description: Hestia is an open-source, multi-tenant mobile application designed to centralize and simplify access to homelessness resources.
+
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -11,19 +15,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+ copilot/fetch-resources-by-county-id
+  supabase_flutter: ^2.3.4
+
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
   http: ^1.2.2
   go_router: ^14.6.1
   supabase_flutter: ^2.5.9
+main
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+copilot/fetch-resources-by-county-id
+
   build_runner: ^2.4.8
   freezed: ^2.4.7
   json_serializable: ^6.7.1
+main
 
 flutter:
   uses-material-design: true
