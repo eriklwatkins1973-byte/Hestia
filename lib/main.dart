@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+ copilot/fetch-resources-by-county-id
 import 'services/resource_service.dart';
 import 'models/resource.dart';
 
@@ -18,11 +19,30 @@ Future<void> main() async {
 /// Returns the globally initialised [SupabaseClient].
 SupabaseClient get supabase => Supabase.instance.client;
 
+=======
+import 'router.dart';
+
+// TODO: Replace these placeholder values with your Supabase project credentials.
+// Find them at: https://supabase.com/dashboard → Settings → API
+const _supabaseUrl = 'YOUR_SUPABASE_URL';
+const _supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    url: _supabaseUrl,
+    anonKey: _supabaseAnonKey,
+  );
+  runApp(const HestiaApp());
+}
+
+main
 class HestiaApp extends StatelessWidget {
   const HestiaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+ copilot/fetch-resources-by-county-id
     return MaterialApp(
       title: 'Hestia',
       theme: ThemeData(
@@ -104,6 +124,15 @@ class _ResourceListScreenState extends State<ResourceListScreen> {
                     );
                   },
                 ),
+
+    return MaterialApp.router(
+      title: 'Hestia',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      routerConfig: appRouter,
+main
     );
   }
 }
